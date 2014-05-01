@@ -5,8 +5,14 @@ local datetime = require "util.datetime";
 
 local function handle_stanza(event)
     local origin, stanza = event.origin, event.stanza;
-    local f = io.open(module:get_option_string("stanza_log_file", "/tmp/log.xml"), "a+");
-    f:write("<stanza ts='" .. datetime.datetime() .. "'>" .. tostring(stanza) .. "</stanza>\n");
+    local filename = module:get_option_string("stanza_log_file", "/tmp/log.xml");
+    filename = os.date(filename);
+    local f = io.open(filename, "a+");
+    if not f then
+        os.execute("mkdir -p `dirname " .. filename .. "`")
+        f = io.open(filename, "a+")
+    end
+    f:write("<stanza ts='" .. datetime.datetime() .. "'>" .. tostring(stanza):gsub("\n", "&#10;") .. "</stanza>\n");
     f:close();
 end
 
